@@ -15,7 +15,7 @@ from deserialize.exceptions import DeserializeException, InvalidBaseTypeExceptio
 from deserialize.type_checks import *
 
 
-def deserialize(class_reference, data):
+def deserialize(class_reference, data, strict=True):
     """Deserialize data to a Python object."""
 
     if not isinstance(data, dict) and not isinstance(data, list):
@@ -26,29 +26,29 @@ def deserialize(class_reference, data):
     except AttributeError:
         name = str(class_reference)
 
-    return _deserialize(class_reference, data, name)
+    return _deserialize(class_reference, data, name, strict)
 
 
-def _deserialize(class_reference, data, debug_name):
+def _deserialize(class_reference, data, debug_name, strict):
     """Deserialize data to a Python object, but allow base types"""
 
     if is_union(class_reference):
         valid_types = union_types(class_reference)
         for valid_type in valid_types:
             try:
-                return _deserialize(valid_type, data, debug_name)
+                return _deserialize(valid_type, data, debug_name, strict)
             except DeserializeException:
                 pass
         raise DeserializeException(f"Cannot deserialize '{type(data)}' to '{class_reference}' for '{debug_name}'")
 
     if isinstance(data, dict):
-        return _deserialize_dict(class_reference, data, debug_name)
+        return _deserialize_dict(class_reference, data, debug_name, strict)
 
     if isinstance(data, list):
-        return _deserialize_list(class_reference, data, debug_name)
+        return _deserialize_list(class_reference, data, debug_name, strict)
 
     if isinstance(data, tuple) and is_typing_type(class_reference):
-        return _deserialize_tuple(class_reference, data, debug_name)
+        return _deserialize_tuple(class_reference, data, debug_name, strict)
 
     if not is_typing_type(class_reference) and issubclass(class_reference, enum.Enum):
         try:
@@ -64,6 +64,10 @@ def _deserialize(class_reference, data, debug_name):
     if is_typing_type(class_reference):
         raise DeserializeException(f"Unsupported deserialization type: {class_reference}")
 
+    if data is None and not strict:
+        return None
+
+
     # Whatever we have left now is either correct, or invalid
     if isinstance(data, class_reference):
         return data
@@ -72,7 +76,7 @@ def _deserialize(class_reference, data, debug_name):
 
 
 
-def _deserialize_list(class_reference, list_data, debug_name):
+def _deserialize_list(class_reference, list_data, debug_name, strict):
 
     if not isinstance(list_data, list):
         raise DeserializeException(f"Cannot deserialize '{type(list_data)}' as a list for {debug_name}")
@@ -85,14 +89,14 @@ def _deserialize_list(class_reference, list_data, debug_name):
     output = []
 
     for index, item in enumerate(list_data):
-        deserialized = _deserialize(list_content_type_value, item, f"{debug_name}[{index}]")
+        deserialized = _deserialize(list_content_type_value, item, f"{debug_name}[{index}]", strict)
         output.append(deserialized)
 
     return output
 
 
 
-def _deserialize_tuple(class_reference, tuple_data, debug_name):
+def _deserialize_tuple(class_reference, tuple_data, debug_name, strict):
 
     if not isinstance(tuple_data, tuple):
         raise DeserializeException(f"Cannot deserialize '{type(tuple_data)}' as a list for {debug_name}")
@@ -105,13 +109,13 @@ def _deserialize_tuple(class_reference, tuple_data, debug_name):
     output = []
 
     for index, (item, item_type) in enumerate(zip(tuple_data, tuple_content_types_value)):
-        deserialized = _deserialize(item_type, item, f"{debug_name}[{index}]")
+        deserialized = _deserialize(item_type, item, f"{debug_name}[{index}]", strict)
         output.append(deserialized)
 
     return tuple(output)
 
 
-def _deserialize_dict(class_reference, data, debug_name):
+def _deserialize_dict(class_reference, data, debug_name, strict):
     """Deserialize a dictionary to a Python object."""
 
     # Check if we are doing a straightforward dictionary parse first, or if it
@@ -128,7 +132,7 @@ def _deserialize_dict(class_reference, data, debug_name):
             if not isinstance(dict_key, key_type):
                 raise DeserializeException(f"Could not deserialize key {dict_key} to type {key_type} for {debug_name}")
 
-            result[dict_key] = _deserialize(value_type, dict_value, f"{debug_name}.{dict_key}")
+            result[dict_key] = _deserialize(value_type, dict_value, f"{debug_name}.{dict_key}", strict)
 
         return result
 
@@ -149,7 +153,7 @@ def _deserialize_dict(class_reference, data, debug_name):
         parser_function = _get_parser(class_reference, property_key)
         property_value = parser_function(data.get(property_key))
 
-        deserialized_value = _deserialize(attribute_type, property_value, f"{debug_name}.{attribute_name}")
+        deserialized_value = _deserialize(attribute_type, property_value, f"{debug_name}.{attribute_name}", strict)
         setattr(class_instance, attribute_name, deserialized_value)
 
     return class_instance
