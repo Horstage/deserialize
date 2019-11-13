@@ -173,7 +173,9 @@ def _deserialize_tuple(
     for index, (item, item_type) in enumerate(
         zip(tuple_data, tuple_content_types_value)
     ):
-        deserialized = _deserialize(item_type, item, f"{debug_name}[{index}]", strict)
+        deserialized = _deserialize(
+            item_type, item, f"{debug_name}[{index}]", throw_on_unhandled, strict
+        )
         output.append(deserialized)
 
     return tuple(output)
