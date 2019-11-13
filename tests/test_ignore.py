@@ -25,9 +25,7 @@ class DeserializationInogreTestSuite(unittest.TestCase):
     def test_keys(self):
         """Test that root lists deserialize correctly."""
 
-        data = {
-            "field_1": 1,
-        }
+        data = {"field_1": 1}
 
         instance = deserialize.deserialize(SampleItem, data)
         self.assertEqual(data["field_1"], instance.field_1)

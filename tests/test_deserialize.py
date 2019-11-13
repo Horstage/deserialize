@@ -84,6 +84,7 @@ class TypeWithSimpleDict:
 
 class TypeWithSimpleDict:
     """Test a class that has a simple dict embedded."""
+
     value: int
     dict_value: dict
 
@@ -111,11 +112,13 @@ class TypeWithUnion:
 
 class TypeWithUnion:
     """Test a class that has a Union embedded."""
+
     union_value: Union[str, int]
 
 
 class TypeWithEllipseTuple:
     """Test a class that has a Union embedded."""
+
     tuple_value: Tuple[str, ...]
 
 
@@ -333,9 +336,7 @@ class DeserializationTestSuite(unittest.TestCase):
             for key, value in test_case["dict_value"].items():
                 self.assertEqual(instance.dict_value.get(key), value)
 
-        failure_cases = [
-            {"value": 1, "dict_value": []},
-        ]
+        failure_cases = [{"value": 1, "dict_value": []}]
 
         for test_case in failure_cases:
             with self.assertRaises(deserialize.DeserializeException):
@@ -345,17 +346,8 @@ class DeserializationTestSuite(unittest.TestCase):
         """Test parsing types with dicts."""
 
         test_cases = [
-            {
-                "value": 1,
-                "dict_value": {
-                    "Hello": 1,
-                    "World": 2
-                }
-            },
-            {
-                "value": 1,
-                "dict_value": {}
-            },
+            {"value": 1, "dict_value": {"Hello": 1, "World": 2}},
+            {"value": 1, "dict_value": {}},
         ]
 
         for test_case in test_cases:
@@ -364,12 +356,7 @@ class DeserializationTestSuite(unittest.TestCase):
             for key, value in test_case["dict_value"].items():
                 self.assertEqual(instance.dict_value.get(key), value)
 
-        failure_cases = [
-            {
-                "value": 1,
-                "dict_value": []
-            },
-        ]
+        failure_cases = [{"value": 1, "dict_value": []}]
 
         for test_case in failure_cases:
             with self.assertRaises(deserialize.DeserializeException):
@@ -385,7 +372,7 @@ class DeserializationTestSuite(unittest.TestCase):
                     "Hello": {"value": 1, "dict_value": {"Hello": 1, "World": 2}}
                 },
                 "any_dict_value": {"Hello": 4, "World": ":D"},
-            },
+            }
         ]
 
         for test_case in test_cases:
@@ -415,18 +402,13 @@ class DeserializationTestSuite(unittest.TestCase):
     def test_type_with_union(self):
         """Test parsing types with complex dicts."""
 
-        test_cases = [
-            {"union_value": "one"},
-            {"union_value": 1},
-        ]
+        test_cases = [{"union_value": "one"}, {"union_value": 1}]
 
         for test_case in test_cases:
             instance = deserialize.deserialize(TypeWithUnion, test_case)
             self.assertEqual(instance.union_value, test_case["union_value"])
 
-        failure_cases = [
-            {"union_value": None},
-        ]
+        failure_cases = [{"union_value": None}]
 
         for test_case in failure_cases:
             with self.assertRaises(deserialize.DeserializeException):
@@ -436,29 +418,16 @@ class DeserializationTestSuite(unittest.TestCase):
         """Test parsing types with complex dicts."""
 
         test_cases = [
-            {
-                "tuple_value": tuple()
-            },
-            {
-                "tuple_value": ("one",)
-            },
-            {
-                "tuple_value": ("one", "two", "three", "four")
-            },
+            {"tuple_value": tuple()},
+            {"tuple_value": ("one",)},
+            {"tuple_value": ("one", "two", "three", "four")},
         ]
 
         for test_case in test_cases:
             instance = deserialize.deserialize(TypeWithEllipseTuple, test_case)
             self.assertEqual(instance.tuple_value, test_case["tuple_value"])
 
-        failure_cases = [
-            {
-                "tuple_value": (1,)
-            },
-            {
-                "tuple_value": ("one", 2)
-            },
-        ]
+        failure_cases = [{"tuple_value": (1,)}, {"tuple_value": ("one", 2)}]
 
         for test_case in failure_cases:
             with self.assertRaises(deserialize.DeserializeException):
