@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "deserialize"
-version = "0.11.0"
+version = "1.0.0"
 description = "A library to make deserialization easy."
 
 license = "MIT"
@@ -17,7 +17,7 @@ homepage = "https://github.com/dalemyers/deserialize"
 keywords = ['deserialization', 'deserialize', 'objects', 'object', 'json']
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -30,10 +30,11 @@ classifiers = [
 python = "^3.6"
 
 [tool.poetry.dev-dependencies]
-mypy = "=0.641"
-pylint = "=2.1.1"
-pytest = "=4.0.1"
-pytest-cov = "=2.6.0"
+black = "=19.10b0"
+mypy = "=0.740"
+pylint = "=2.4.3"
+pytest = "=5.2.2"
+pytest-cov = "=2.8.1"
 
 [build-system]
 requires = ["poetry>=0.12"]
